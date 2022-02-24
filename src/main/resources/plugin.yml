@@ -1,0 +1,11 @@
+name: CadiaFarms
+version: '${project.version}'
+main: me.shreyasayyengar.cadiafarms.CadiaFarmsPlugin
+api-version: 1.18
+prefix: CadiaFarms
+author: ShreyasAyyengar
+description: A custom farming plugin for mobs
+load: POSTWORLD
+
+commands:
+  give:
