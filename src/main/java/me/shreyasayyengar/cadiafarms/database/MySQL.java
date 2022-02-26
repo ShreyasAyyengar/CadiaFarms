@@ -48,12 +48,4 @@ public class MySQL {
         }
         return ps;
     }
-
-    public PreparedStatementBuilder preparedStatementBuilder(String query) throws SQLException {
-        return new PreparedStatementBuilder(this.connection, query);
-    }
-
-    public Connection getConnection() {
-        return this.connection;
-    }
 }

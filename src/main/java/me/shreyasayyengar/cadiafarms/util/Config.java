@@ -4,10 +4,11 @@ import me.shreyasayyengar.cadiafarms.CadiaFarmsPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Config {
 
@@ -54,26 +55,6 @@ public class Config {
                 }
             }
         }
-    }
-
-    public static Collection<ItemStack> getEntityDrops(EntityType type) {
-
-        Collection<ItemStack> drops = new HashSet<>();
-        for (String key : main.getConfig().getConfigurationSection("mob-drops").getKeys(false)) {
-            if (key.equalsIgnoreCase(type.name())) {
-                for (String drop : main.getConfig().getStringList("mob-drops." + key)) {
-                    String[] data = drop.split("%");
-
-                    ItemStack stack = new ItemStack(Material.valueOf(data[0]));
-                    ItemMeta itemMeta = stack.getItemMeta();
-                    itemMeta.setLore(List.of(Utility.colourise("&7Drop Chance: &a" + data[1])));
-                    stack.setItemMeta(itemMeta);
-                    drops.add(stack);
-                }
-            }
-
-        }
-        return drops;
     }
 
     public static Collection<EntityType> getRegisteredEntityTypes() {

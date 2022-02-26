@@ -46,14 +46,13 @@ public class Interact implements Listener {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 
             Player player = event.getPlayer();
             ItemStack item = player.getInventory().getItemInMainHand();
-
-            if (item == null) return;
 
             if (item.getType().name().contains("SPAWN_EGG")) {
 
@@ -69,6 +68,7 @@ public class Interact implements Listener {
 
                     EntityType type = EntityType.valueOf(itemMeta.getLocalizedName().split("\\.")[1]);
                     player.getInventory().getItemInMainHand().subtract();
+                    //noinspection ConstantConditions
                     Ageable entity = (Ageable) player.getWorld().spawnEntity(event.getClickedBlock().getLocation().add(.5, 1.5, .5), type);
                     entity.setAdult();
                     entity.setCustomNameVisible(false);

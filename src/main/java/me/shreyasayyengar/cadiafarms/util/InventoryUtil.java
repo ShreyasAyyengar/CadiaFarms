@@ -56,6 +56,7 @@ public class InventoryUtil {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public static void openBaseInventory(Player player, UUID mobUUID, Location location) {
 
         Inventory inventory = Bukkit.createInventory(null, 9, Utility.colourise("&6&lCadia Mob Inventory"));

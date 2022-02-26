@@ -17,10 +17,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CadiaMobManager {
 
-    public final Collection<UUID> toLoadWaitlist = new HashSet<>();
+    public final Collection<UUID> unloadedWaitlist = new HashSet<>();
     private final List<CadiaMob> mobs = new ArrayList<>();
     private final Map<EntityType, RandomWeightCollection<Material>> randomisdDrops = new HashMap<>();
 
+    @SuppressWarnings("deprecation")
     public void giveCadiaMobEgg(Player player, EntityType type, int amount) {
 
         ItemStack stack = new SpawnEgg(type).toItemStack(amount);
@@ -34,24 +35,6 @@ public class CadiaMobManager {
             player.getWorld().dropItem(player.getLocation(), integerItemStackHashMap.get(0));
         }
         player.sendMessage(Utility.colourise("&bSpawn egg given!"));
-    }
-
-    public int getEntityCountInChunk(Chunk chunk) {
-        AtomicInteger amount = new AtomicInteger();
-
-        for (Entity entity : chunk.getEntities()) {
-            mobs.forEach(cadiaMob -> {
-                if (cadiaMob.getEntityUUID().equals(entity.getUniqueId())) {
-                    amount.getAndIncrement();
-                }
-            });
-        }
-
-        return amount.get();
-    }
-
-    public List<CadiaMob> getMobs() {
-        return mobs;
     }
 
     public RandomWeightCollection<Material> getDrops(EntityType type) {
@@ -88,6 +71,10 @@ public class CadiaMobManager {
         return mood;
     }
 
+    public List<CadiaMob> getMobs() {
+        return mobs;
+    }
+
     public void clearMobs(EntityType type, Chunk chunk) {
         System.out.println("method called");
         for (Entity entity : chunk.getEntities()) {
@@ -102,4 +89,19 @@ public class CadiaMobManager {
             }
         }
     }
+
+    public int getEntityCountInChunk(Chunk chunk) {
+        AtomicInteger amount = new AtomicInteger();
+
+        for (Entity entity : chunk.getEntities()) {
+            mobs.forEach(cadiaMob -> {
+                if (cadiaMob.getEntityUUID().equals(entity.getUniqueId())) {
+                    amount.getAndIncrement();
+                }
+            });
+        }
+
+        return amount.get();
+    }
+
 }

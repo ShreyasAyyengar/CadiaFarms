@@ -4,7 +4,6 @@ import me.shreyasayyengar.cadiafarms.CadiaFarmsPlugin;
 import me.shreyasayyengar.cadiafarms.objects.CadiaMob;
 import me.shreyasayyengar.cadiafarms.util.CadiaMobManager;
 import org.bukkit.Chunk;
-import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,9 +13,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class ChunkLoad implements Listener {
 
@@ -31,9 +28,10 @@ public class ChunkLoad implements Listener {
                 for (Entity entity : chunk.getEntities()) {
                     UUID uuid = entity.getUniqueId();
 
-                    if (mobManager.toLoadWaitlist.contains(uuid)) {
+                    if (mobManager.unloadedWaitlist.contains(uuid)) {
                         try {
                             new CadiaMob(uuid);
+                            mobManager.unloadedWaitlist.remove(uuid);
                         } catch (IOException | SQLException e) {
                             e.printStackTrace();
                         }
@@ -52,7 +50,6 @@ public class ChunkLoad implements Listener {
     @EventHandler
     public void onChunkUnload(ChunkUnloadEvent event) {
         Chunk chunk = event.getChunk();
-        CadiaMobManager mobManager = CadiaFarmsPlugin.getInstance().getMobManager();
 
         for (Entity entity : chunk.getEntities()) {
             UUID uuid = entity.getUniqueId();
@@ -63,13 +60,5 @@ public class ChunkLoad implements Listener {
                 }
             }
         }
-    }
-
-    public List<Entity> findByChunk(World world, Chunk chunk) {
-        return world.getEntities()
-                .stream()
-                .filter(
-                        entity -> entity.getChunk().getChunkKey() == chunk.getChunkKey())
-                .collect(Collectors.toList());
     }
 }

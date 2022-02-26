@@ -19,6 +19,7 @@ import java.util.UUID;
 
 public class Click implements Listener {
 
+    @SuppressWarnings("deprecation")
     @EventHandler
     private void onClick(InventoryClickEvent e) {
 
@@ -81,6 +82,7 @@ public class Click implements Listener {
                 }
             }
 
+            //noinspection ConstantConditions
             InventoryUtil.openBaseInventory(player, uuid, Bukkit.getEntity(uuid).getLocation());
         }
 

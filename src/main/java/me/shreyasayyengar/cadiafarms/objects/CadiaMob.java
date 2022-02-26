@@ -15,11 +15,12 @@ import org.bukkit.scheduler.BukkitTask;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.UUID;
 
 public class CadiaMob {
-
-    public static final Collection<CadiaMob> UNLOADED_MOBS = new HashSet<>();
 
     private final CadiaFarmsPlugin plugin = CadiaFarmsPlugin.getInstance();
     private final Collection<BukkitTask> tasks = new HashSet<>();
@@ -32,7 +33,6 @@ public class CadiaMob {
     private Inventory bukkitInventory;
     private boolean dropOnFloor = false;
     private boolean loaded = true;
-    private ResultSet resultSet;
     private boolean previouslyFailedQuota = false;
 
     private double moodLevel;
@@ -43,7 +43,7 @@ public class CadiaMob {
 
     public CadiaMob(UUID entityUUID) throws IOException, SQLException {
         this();
-        this.resultSet = plugin.getDatabase().preparedStatement("SELECT * FROM cadia_mob_info WHERE uuid = '" + entityUUID.toString() + "'").executeQuery();
+        ResultSet resultSet = plugin.getDatabase().preparedStatement("SELECT * FROM cadia_mob_info WHERE uuid = '" + entityUUID.toString() + "'").executeQuery();
         resultSet.next();
 
         this.entityUUID = entityUUID;
@@ -51,9 +51,6 @@ public class CadiaMob {
         this.moodLevel = resultSet.getDouble("mood_level");
         this.dropOnFloor = resultSet.getBoolean("drop_floor");
         this.bukkitInventory = InventoryUtil.fromBase64(resultSet.getString("inventory"));
-//        this.entityType = EntityType.valueOf(plugin.getConfig().getString(path + "entity-type"));
-//        this.moodLevel = plugin.getConfig().getDouble(path + "mood-level");
-//        this.bukkitInventory = InventoryUtil.fromBase64(plugin.getConfig().getString(path + "inventory"));
         setDrops();
         runTasks();
     }
@@ -63,6 +60,7 @@ public class CadiaMob {
         this.entityUUID = entity.getUniqueId();
         this.entityType = entity.getType();
         this.moodLevel = 0.5;
+        //noinspection deprecation
         this.bukkitInventory = Bukkit.createInventory(null, 54, "Mob Bank");
         Utility.createData(this);
         setDrops();
@@ -208,7 +206,6 @@ public class CadiaMob {
         this.loaded = false;
     }
 
-
     // --- Getters
 
     public UUID getEntityUUID() {
@@ -233,24 +230,11 @@ public class CadiaMob {
         this.dropOnFloor = dropOnFloor;
     }
 
-
     public Inventory getBukkitInventory() {
         return bukkitInventory;
     }
 
     public EntityType getType() {
         return entityType;
-    }
-
-    public RandomWeightCollection<Material> getDrops() {
-        return drops;
-    }
-
-    public boolean isLoaded() {
-        return loaded;
-    }
-
-    public void setLoaded(boolean loaded) {
-        this.loaded = loaded;
     }
 }

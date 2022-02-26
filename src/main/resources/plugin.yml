@@ -9,3 +9,4 @@ load: POSTWORLD
 
 commands:
   cadiafarm:
+    description: The main command for the plugin

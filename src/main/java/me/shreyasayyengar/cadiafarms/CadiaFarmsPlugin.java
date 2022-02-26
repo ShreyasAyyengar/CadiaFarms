@@ -39,6 +39,7 @@ public final class CadiaFarmsPlugin extends JavaPlugin {
     }
 
     private void registerCommands() {
+        //noinspection ConstantConditions
         this.getCommand("cadiafarm").setExecutor(new CadiaBaseCommand());
     }
 
@@ -65,12 +66,12 @@ public final class CadiaFarmsPlugin extends JavaPlugin {
 
             while (resultSet.next()) {
                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                mobManager.toLoadWaitlist.add(uuid);
-//                new CadiaMob(uuid);
+                mobManager.unloadedWaitlist.add(uuid);
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            getLogger().severe("There was a problem loading existing mobs from the database! Please contact the developer!");
+            this.getServer().getPluginManager().disablePlugin(this);
         }
     }
 
