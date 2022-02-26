@@ -24,13 +24,15 @@ public class CadiaMob {
 
     private final CadiaFarmsPlugin plugin = CadiaFarmsPlugin.getInstance();
     private final Collection<BukkitTask> tasks = new HashSet<>();
-    private final double drop5Quota = 0.6;
+    private final double drop5Quota = 0.8;
 
+    private Entity bukkitEntity;
     private UUID entityUUID;
     private EntityType entityType;
-    private Entity bukkitEntity;
+
     private RandomWeightCollection<Material> drops;
     private Inventory bukkitInventory;
+
     private boolean dropOnFloor = false;
     private boolean loaded = true;
     private boolean previouslyFailedQuota = false;
@@ -46,8 +48,9 @@ public class CadiaMob {
         ResultSet resultSet = plugin.getDatabase().preparedStatement("SELECT * FROM cadia_mob_info WHERE uuid = '" + entityUUID.toString() + "'").executeQuery();
         resultSet.next();
 
-        this.entityUUID = entityUUID;
-        this.entityType = EntityType.valueOf(resultSet.getString("entity_type"));
+        this.bukkitEntity = Bukkit.getEntity(entityUUID);
+        this.entityUUID = bukkitEntity.getUniqueId();
+        this.entityType = bukkitEntity.getType();
         this.moodLevel = resultSet.getDouble("mood_level");
         this.dropOnFloor = resultSet.getBoolean("drop_floor");
         this.bukkitInventory = InventoryUtil.fromBase64(resultSet.getString("inventory"));
@@ -57,6 +60,7 @@ public class CadiaMob {
 
     public CadiaMob(LivingEntity entity) {
         this();
+        this.bukkitEntity = entity;
         this.entityUUID = entity.getUniqueId();
         this.entityType = entity.getType();
         this.moodLevel = 0.5;
@@ -79,7 +83,7 @@ public class CadiaMob {
             @Override
             public void run() {
                 if (!CadiaMob.this.loaded) return;
-                if (Bukkit.getEntity(entityUUID) == null || Bukkit.getEntity(entityUUID).isDead()) {
+                if (bukkitEntity == null || bukkitEntity.isDead()) {
                     plugin.getMobManager().getMobs().remove(CadiaMob.this);
                     removeEntity();
                 }
@@ -124,7 +128,7 @@ public class CadiaMob {
                     color = Color.fromBGR(255, 223, 13);
                 }
 
-                Location location = Bukkit.getEntity(entityUUID).getLocation();
+                Location location = bukkitEntity.getLocation();
                 for (int degree = 0; degree < 360; degree++) {
                     double radians = Math.toRadians(degree);
                     double x = Math.cos(radians);
@@ -152,14 +156,14 @@ public class CadiaMob {
         if (drops != null) {
             ItemStack drop = new ItemStack(drops.next());
             if (dropOnFloor) {
-                Bukkit.getEntity(entityUUID).getWorld().dropItem(Bukkit.getEntity(entityUUID).getLocation(), drop);
+                bukkitEntity.getWorld().dropItem(bukkitEntity.getLocation(), drop);
             } else {
 
                 // Handles full inventory
                 HashMap<Integer, ItemStack> integerItemStackHashMap = bukkitInventory.addItem(drop);
                 if (!integerItemStackHashMap.isEmpty()) {
                     for (ItemStack itemStack : integerItemStackHashMap.values()) {
-                        Bukkit.getEntity(entityUUID).getWorld().dropItem(Bukkit.getEntity(entityUUID).getLocation(), itemStack);
+                        bukkitEntity.getWorld().dropItem(bukkitEntity.getLocation(), itemStack);
                     }
                     return;
                 }
@@ -172,7 +176,7 @@ public class CadiaMob {
                     if (stack.getType() == drop.getType()) {
                         typeCounter += stack.getAmount() + 1;
                         if (typeCounter >= 32) {
-                            Bukkit.getEntity(entityUUID).getWorld().dropItem(Bukkit.getEntity(entityUUID).getLocation(), drop);
+                            bukkitEntity.getWorld().dropItem(bukkitEntity.getLocation(), drop);
                         }
                     }
                 }

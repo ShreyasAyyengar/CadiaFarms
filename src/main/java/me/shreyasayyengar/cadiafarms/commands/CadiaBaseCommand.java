@@ -28,6 +28,7 @@ public class CadiaBaseCommand implements CommandExecutor {
                 case "give" -> {
                     if (args.length != 4) {
                         sendUsage(player);
+                        return false;
                     }
 
                     EntityType type;
