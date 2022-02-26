@@ -3,9 +3,7 @@ package me.shreyasayyengar.cadiafarms.objects;
 import me.shreyasayyengar.cadiafarms.CadiaFarmsPlugin;
 import me.shreyasayyengar.cadiafarms.util.InventoryUtil;
 import me.shreyasayyengar.cadiafarms.util.Utility;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -17,15 +15,14 @@ import org.bukkit.scheduler.BukkitTask;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 public class CadiaMob {
 
+    public static final Collection<CadiaMob> UNLOADED_MOBS = new HashSet<>();
+
     private final CadiaFarmsPlugin plugin = CadiaFarmsPlugin.getInstance();
-    private final Collection<BukkitTask> tasks = new ArrayList<>();
+    private final Collection<BukkitTask> tasks = new HashSet<>();
     private final double drop5Quota = 0.6;
 
     private UUID entityUUID;
@@ -34,12 +31,13 @@ public class CadiaMob {
     private RandomWeightCollection<Material> drops;
     private Inventory bukkitInventory;
     private boolean dropOnFloor = false;
+    private boolean loaded = true;
     private ResultSet resultSet;
     private boolean previouslyFailedQuota = false;
 
     private double moodLevel;
 
-    public CadiaMob() {
+    private CadiaMob() {
         plugin.getMobManager().getMobs().add(this);
     }
 
@@ -77,27 +75,24 @@ public class CadiaMob {
     }
 
     private void runTasks() {
+        if (!this.loaded) return;
 
         tasks.add(new BukkitRunnable() {
             @Override
             public void run() {
-                boolean load = Bukkit.getWorld("onexp").getChunkAt(new Location((Bukkit.getWorld("onexp")), 234, 0, 83)).load();
-                System.out.println(load + " <- chunk loaded");
-                System.out.println(new Location((Bukkit.getWorld("onexp")), 234, 0, 83).getChunk().isLoaded());
-
-                System.out.println(Bukkit.getEntity(entityUUID));
-
+                if (!CadiaMob.this.loaded) return;
                 if (Bukkit.getEntity(entityUUID) == null || Bukkit.getEntity(entityUUID).isDead()) {
                     plugin.getMobManager().getMobs().remove(CadiaMob.this);
                     removeEntity();
                 }
             }
-        }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 20L, 20L));
+        }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 0, 20));
 
 
         tasks.add(new BukkitRunnable() {
             @Override
             public void run() {
+                if (!CadiaMob.this.loaded) return;
 
                 if (previouslyFailedQuota) {
                     dropItem();
@@ -113,16 +108,46 @@ public class CadiaMob {
                 previouslyFailedQuota = true;
             }
 
-        }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 1, 100L));
+        }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 1, 100));
 
         tasks.add(new BukkitRunnable() {
             @Override
             public void run() {
+                if (!CadiaMob.this.loaded) return;
+                if (moodLevel > 0.7) return;
+
+                Color color = Color.GRAY;
+
+                if (moodLevel <= 0.5) {
+                    color = Color.fromBGR(0, 0, 181);
+                }
+
+                if (moodLevel > 0.5) {
+                    color = Color.fromBGR(255, 223, 13);
+                }
+
+                Location location = Bukkit.getEntity(entityUUID).getLocation();
+                for (int degree = 0; degree < 360; degree++) {
+                    double radians = Math.toRadians(degree);
+                    double x = Math.cos(radians);
+                    double z = Math.sin(radians);
+                    location.add(x, 0, z);
+                    location.getWorld().spawnParticle(Particle.REDSTONE.builder().color(Color.RED).count(1).particle(), location.clone().add(0, 1, 0), 2, new Particle.DustOptions(color, 1));
+                    location.subtract(x, 0, z);
+                }
+            }
+        }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 1, 3000L));
+
+        tasks.add(new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!CadiaMob.this.loaded) return;
+
                 if (moodLevel > 0) {
                     moodLevel -= 0.1;
                 }
             }
-        }.runTaskTimerAsynchronously(CadiaFarmsPlugin.getInstance(), 12000L, 12000L));
+        }.runTaskTimerAsynchronously(CadiaFarmsPlugin.getInstance(), 12000, 12000));
     }
 
     private void dropItem() {
@@ -175,25 +200,39 @@ public class CadiaMob {
         }
     }
 
+    public void load() {
+        this.loaded = true;
+    }
+
+    public void unload() {
+        this.loaded = false;
+    }
+
+
+    // --- Getters
+
     public UUID getEntityUUID() {
         return this.entityUUID;
     }
 
     public void plusMood() {
-        this.moodLevel = moodLevel + 0.1;
+        if (moodLevel < 1.0) {
+            moodLevel += 0.1;
+        }
     }
 
     public double getMoodLevel() {
         return moodLevel;
     }
 
+    public boolean doesDrop() {
+        return dropOnFloor;
+    }
+
     public void setDropOnFloor(boolean dropOnFloor) {
         this.dropOnFloor = dropOnFloor;
     }
 
-    public boolean doesDrop() {
-        return dropOnFloor;
-    }
 
     public Inventory getBukkitInventory() {
         return bukkitInventory;
@@ -205,5 +244,13 @@ public class CadiaMob {
 
     public RandomWeightCollection<Material> getDrops() {
         return drops;
+    }
+
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    public void setLoaded(boolean loaded) {
+        this.loaded = loaded;
     }
 }

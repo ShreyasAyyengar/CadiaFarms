@@ -17,17 +17,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CadiaMobManager {
 
+    public final Collection<UUID> toLoadWaitlist = new HashSet<>();
     private final List<CadiaMob> mobs = new ArrayList<>();
     private final Map<EntityType, RandomWeightCollection<Material>> randomisdDrops = new HashMap<>();
 
-    public void giveCadiaMobEgg(Player player, EntityType type) {
+    public void giveCadiaMobEgg(Player player, EntityType type, int amount) {
 
-        ItemStack stack = new SpawnEgg(type).toItemStack(1);
+        ItemStack stack = new SpawnEgg(type).toItemStack(amount);
         SpawnEggMeta itemMeta = (SpawnEggMeta) stack.getItemMeta();
         itemMeta.setDisplayName(WordUtils.capitalize(type.name().toLowerCase()) + " Spawn Egg");
         itemMeta.setLocalizedName("cadiamob." + type.name() + ".cancelexempt");
         stack.setItemMeta(itemMeta);
-        player.getWorld().dropItemNaturally(player.getLocation(), stack);
+
+        HashMap<Integer, ItemStack> integerItemStackHashMap = player.getInventory().addItem(stack);
+        if (!integerItemStackHashMap.isEmpty()) {
+            player.getWorld().dropItem(player.getLocation(), integerItemStackHashMap.get(0));
+        }
+        player.sendMessage(Utility.colourise("&bSpawn egg given!"));
     }
 
     public int getEntityCountInChunk(Chunk chunk) {
@@ -65,23 +71,35 @@ public class CadiaMobManager {
         for (CadiaMob mob : mobs) {
             if (mob.getEntityUUID().equals(mobUUID)) {
 
-                // if moodLevel is inbetween 0.1 and 0,5, return color "ANGRY"
                 if (mob.getMoodLevel() <= 0.5) {
                     mood = Utility.colourise("&4&lANGRY");
                 }
 
-                // if moodLevel is inbetween 0.6 and 0.7, return color "CALM"
-                if (mob.getMoodLevel() >= 0.6 && mob.getMoodLevel() <= 0.7) {
+                if (mob.getMoodLevel() > 0.5 && mob.getMoodLevel() <= 0.7) {
                     mood = Utility.colourise("&b&lCALM");
                 }
 
-                // if moodLevel is inbetween 0.8 and 1.0, return color "HAPPY"
-                if (mob.getMoodLevel() >= 0.8 && mob.getMoodLevel() <= 1.0) {
+                if (mob.getMoodLevel() > 0.7) {
                     mood = Utility.colourise("&a&lHAPPY");
                 }
             }
         }
 
         return mood;
+    }
+
+    public void clearMobs(EntityType type, Chunk chunk) {
+        System.out.println("method called");
+        for (Entity entity : chunk.getEntities()) {
+            System.out.println(Arrays.toString(chunk.getEntities()));
+            for (CadiaMob mob : mobs) {
+                if (mob.getEntityUUID().equals(entity.getUniqueId())) {
+                    System.out.println("match");
+                    if (mob.getType().equals(type)) {
+                        entity.remove();
+                    }
+                }
+            }
+        }
     }
 }

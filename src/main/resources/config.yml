@@ -5,7 +5,9 @@
 #     ╚█████╔╝██║  ██║██████╔╝██║██║  ██║██║     ██║  ██║██║  ██║██║ ╚═╝ ██║██║██║ ╚███║╚██████╔╝
 #      ╚════╝ ╚═╝  ╚═╝╚═════╝ ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚══╝ ╚═════╝
 
-# Different Entity Types - https://hub.spigotmc.org/javadocs/spigot/org/bukkit/entity/EntityType.html
+# Valid Entity Types - https://hub.spigotmc.org/javadocs/spigot/org/bukkit/entity/EntityType.html
+# Valid Block Materials - https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+
 mob-drops:
   SHEEP:
     - "RED_WOOL%80"

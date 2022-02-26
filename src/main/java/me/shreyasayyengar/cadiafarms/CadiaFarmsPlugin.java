@@ -1,7 +1,8 @@
 package me.shreyasayyengar.cadiafarms;
 
-import me.shreyasayyengar.cadiafarms.commands.GiveCommand;
+import me.shreyasayyengar.cadiafarms.commands.CadiaBaseCommand;
 import me.shreyasayyengar.cadiafarms.database.MySQL;
+import me.shreyasayyengar.cadiafarms.events.ChunkLoad;
 import me.shreyasayyengar.cadiafarms.events.Click;
 import me.shreyasayyengar.cadiafarms.events.Interact;
 import me.shreyasayyengar.cadiafarms.objects.CadiaMob;
@@ -9,17 +10,13 @@ import me.shreyasayyengar.cadiafarms.util.CadiaMobManager;
 import me.shreyasayyengar.cadiafarms.util.Config;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.UUID;
 
 public final class CadiaFarmsPlugin extends JavaPlugin {
 
     private final CadiaMobManager mobManager = new CadiaMobManager();
-    private final Collection<UUID> unLoadedCadiaMobs = new ArrayList<>();
     private MySQL database;
 
     public static CadiaFarmsPlugin getInstance() {
@@ -38,10 +35,11 @@ public final class CadiaFarmsPlugin extends JavaPlugin {
     private void registerEvents() {
         this.getServer().getPluginManager().registerEvents(new Interact(), this);
         this.getServer().getPluginManager().registerEvents(new Click(), this);
+        this.getServer().getPluginManager().registerEvents(new ChunkLoad(), this);
     }
 
     private void registerCommands() {
-        this.getCommand("give").setExecutor(new GiveCommand());
+        this.getCommand("cadiafarm").setExecutor(new CadiaBaseCommand());
     }
 
     private void initMySQL() {
@@ -67,10 +65,11 @@ public final class CadiaFarmsPlugin extends JavaPlugin {
 
             while (resultSet.next()) {
                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                new CadiaMob(uuid);
+                mobManager.toLoadWaitlist.add(uuid);
+//                new CadiaMob(uuid);
             }
 
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }

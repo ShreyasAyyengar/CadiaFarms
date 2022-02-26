@@ -8,4 +8,4 @@ description: A custom farming plugin for mobs
 load: POSTWORLD
 
 commands:
-  give:
+  cadiafarm:

@@ -44,7 +44,7 @@ public class MySQL {
         try {
             ps = this.connection.prepareStatement(query);
         } catch (SQLException x) {
-            System.out.println("There was a problem communicating with the MySQL Database!");
+            Bukkit.getLogger().severe("There was a problem communicating with the MySQL Database!");
         }
         return ps;
     }

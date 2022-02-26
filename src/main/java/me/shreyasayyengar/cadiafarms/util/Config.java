@@ -1,6 +1,7 @@
 package me.shreyasayyengar.cadiafarms.util;
 
 import me.shreyasayyengar.cadiafarms.CadiaFarmsPlugin;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
@@ -73,6 +74,19 @@ public class Config {
 
         }
         return drops;
+    }
+
+    public static Collection<EntityType> getRegisteredEntityTypes() {
+
+        Collection<EntityType> types = new HashSet<>();
+        for (String key : main.getConfig().getConfigurationSection("mob-drops").getKeys(false)) {
+            try {
+                types.add(EntityType.valueOf(key));
+            } catch (IllegalArgumentException e) {
+                Bukkit.getLogger().severe("Invalid mob type: " + key);
+            }
+        }
+        return types;
     }
 
     public static Map<Material, Double> getTiedPercentages(EntityType type) {
