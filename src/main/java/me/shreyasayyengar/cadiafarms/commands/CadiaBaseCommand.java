@@ -23,7 +23,6 @@ public class CadiaBaseCommand implements CommandExecutor {
                 return false;
             }
 
-            System.out.println(args[0].toLowerCase());
             switch (args[0]) {
                 case "give" -> {
                     if (args.length != 4) {

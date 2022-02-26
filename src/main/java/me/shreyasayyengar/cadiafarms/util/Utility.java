@@ -31,14 +31,11 @@ public class Utility {
     }
 
     public static void removeMob(UUID entityUUID) {
-
         try {
             CadiaFarmsPlugin.getInstance().getDatabase().preparedStatement("DELETE FROM cadia_mob_info WHERE `uuid` = '" + entityUUID + "'").executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        System.out.println("removed mob method called");
-
     }
 
 }

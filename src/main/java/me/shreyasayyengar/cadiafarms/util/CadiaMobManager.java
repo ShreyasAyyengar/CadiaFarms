@@ -76,12 +76,9 @@ public class CadiaMobManager {
     }
 
     public void clearMobs(EntityType type, Chunk chunk) {
-        System.out.println("method called");
         for (Entity entity : chunk.getEntities()) {
-            System.out.println(Arrays.toString(chunk.getEntities()));
             for (CadiaMob mob : mobs) {
                 if (mob.getEntityUUID().equals(entity.getUniqueId())) {
-                    System.out.println("match");
                     if (mob.getType().equals(type)) {
                         entity.remove();
                     }
