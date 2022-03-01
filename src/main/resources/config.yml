@@ -25,5 +25,32 @@ MySQL:
   host: "localhost"
   port: 3306
 
-# DO NOT EDIT BELOW THIS LINE
-mob-data: 'leave blank'
+# Do **NOT** change the numbers 1, 2, 3 etc. You may only change what is below them
+GUI:
+  1:
+    displayname:
+    lore:
+      -
+      -
+
+  2:
+    displayname:
+    lore:
+      -
+      -
+
+  3:
+    displayname:
+    lore:
+      -
+      -
+  4:
+    displayname:
+    lore:
+      -
+      -
+  5:
+    displayname:
+    lore:
+      -
+      -

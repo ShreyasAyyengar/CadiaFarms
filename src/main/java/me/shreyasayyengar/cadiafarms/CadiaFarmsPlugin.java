@@ -30,6 +30,11 @@ public final class CadiaFarmsPlugin extends JavaPlugin {
         registerCommands();
         initMySQL();
         loadExistingMobs();
+        initLegacyItems();
+    }
+
+    private void initLegacyItems() {
+
     }
 
     private void registerEvents() {
@@ -74,7 +79,6 @@ public final class CadiaFarmsPlugin extends JavaPlugin {
             this.getServer().getPluginManager().disablePlugin(this);
         }
     }
-
 
     @Override
     public void onDisable() {

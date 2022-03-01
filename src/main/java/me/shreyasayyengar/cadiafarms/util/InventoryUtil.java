@@ -59,13 +59,19 @@ public class InventoryUtil {
     @SuppressWarnings("deprecation")
     public static void openBaseInventory(Player player, UUID mobUUID, Location location) {
 
+        CadiaMob mob = CadiaFarmsPlugin.getInstance().getMobManager().getMobs().stream().filter(c -> c.getEntityUUID().equals(mobUUID)).findFirst().orElse(null);
+        assert mob != null;
+
         Inventory inventory = Bukkit.createInventory(null, 9, Utility.colourise("&6&lCadia Mob Inventory"));
 
         ItemStack mood = new ItemStack(Material.TOTEM_OF_UNDYING);
         ItemMeta moodMeta = mood.getItemMeta();
         moodMeta.setDisplayName(Utility.colourise("&6&lMood"));
         moodMeta.setLocalizedName("cadia.cancel");
-        moodMeta.setLore(List.of("Current mood level: " + CadiaFarmsPlugin.getInstance().getMobManager().getMobMood(mobUUID)));
+        moodMeta.setLore(List.of(
+                "Current mood level: " + CadiaFarmsPlugin.getInstance().getMobManager().getMoodAsString(mobUUID),
+                "(" + (int) (mob.getMoodLevel() * 10) + "/10)"
+        ));
         mood.setItemMeta(moodMeta);
 
         ItemStack openStorage = new ItemStack(Material.CHEST);
@@ -83,17 +89,12 @@ public class InventoryUtil {
         ItemStack drop = new ItemStack(Material.BARRIER);
         ItemMeta dropMeta = drop.getItemMeta();
         dropMeta.setDisplayName(Utility.colourise("&6&lDrop Item"));
-        for (CadiaMob mob : CadiaFarmsPlugin.getInstance().getMobManager().getMobs()) {
-            if (mob.getEntityUUID().equals(mobUUID)) {
-                if (mob.doesDrop()) {
-                    drop = new ItemStack(Material.GREEN_TERRACOTTA);
-                    dropMeta.setLore(List.of(Utility.colourise("&a&lDrop on Floor: &a&lTrue")));
-                } else {
-                    drop = new ItemStack(Material.RED_TERRACOTTA);
-                    dropMeta.setLore(List.of(Utility.colourise("&c&lDrop on Floor: &c&lFalse")));
-                }
-                break;
-            }
+        if (mob.doesDrop()) {
+            drop = new ItemStack(Material.GREEN_TERRACOTTA);
+            dropMeta.setLore(List.of(Utility.colourise("&a&lDrop on Floor: &a&lTrue")));
+        } else {
+            drop = new ItemStack(Material.RED_TERRACOTTA);
+            dropMeta.setLore(List.of(Utility.colourise("&c&lDrop on Floor: &c&lFalse")));
         }
         dropMeta.setLocalizedName("cadia.toggle." + mobUUID);
         drop.setItemMeta(dropMeta);

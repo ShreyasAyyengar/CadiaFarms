@@ -5,10 +5,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Config {
 
@@ -95,5 +93,13 @@ public class Config {
 
     public static int getMaxChunkEntities() {
         return main.getConfig().getInt("max-mobs-per-chunk");
+    }
+
+    public static List<String> getLore(int guiSlot) {
+        return main.getConfig().getStringList("GUI." + guiSlot + ".lore").stream().map(Utility::colourise).collect(Collectors.toList());
+    }
+
+    public static String getDisplayName(int guiSlot) {
+        return main.getConfig().getString("GUI." + guiSlot + ".displayname");
     }
 }

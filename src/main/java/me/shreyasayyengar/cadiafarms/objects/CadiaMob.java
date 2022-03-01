@@ -79,6 +79,7 @@ public class CadiaMob {
     private void runTasks() {
         if (!this.loaded) return;
 
+        // Entity Null and Dead task
         tasks.add(new BukkitRunnable() {
             @Override
             public void run() {
@@ -90,7 +91,7 @@ public class CadiaMob {
             }
         }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 0, 20));
 
-
+        // Entity Drop task
         tasks.add(new BukkitRunnable() {
             @Override
             public void run() {
@@ -112,34 +113,45 @@ public class CadiaMob {
 
         }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 1, 100));
 
+        // Entity Calm Particle Task
         tasks.add(new BukkitRunnable() {
             @Override
             public void run() {
                 if (!CadiaMob.this.loaded) return;
                 if (moodLevel > 0.7) return;
 
-                Color color = Color.GRAY;
-
-                if (moodLevel <= 0.5) {
-                    color = Color.fromBGR(0, 0, 181);
-                }
-
                 if (moodLevel > 0.5) {
-                    color = Color.fromBGR(255, 223, 13);
+                    spawnCircleParticle(Color.fromBGR(255, 223, 13));
                 }
 
-                Location location = bukkitEntity.getLocation();
-                for (int degree = 0; degree < 360; degree++) {
-                    double radians = Math.toRadians(degree);
-                    double x = Math.cos(radians);
-                    double z = Math.sin(radians);
-                    location.add(x, 0, z);
-                    location.getWorld().spawnParticle(Particle.REDSTONE.builder().color(Color.RED).count(1).particle(), location.clone().add(0, 1, 0), 2, new Particle.DustOptions(color, 1));
-                    location.subtract(x, 0, z);
-                }
             }
         }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 1, 3000L));
 
+        // Entity Angry Particle Task
+        tasks.add(new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (moodLevel <= 0.5) {
+                    spawnCircleParticle(Color.fromBGR(0, 0, 181));
+                }
+            }
+        }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 1, 160));
+
+        tasks.add(new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!CadiaMob.this.loaded) return;
+
+                if (!bukkitEntity.isCustomNameVisible()) {
+                    bukkitEntity.setCustomNameVisible(true);
+                }
+
+                String moodAsString = CadiaFarmsPlugin.getInstance().getMobManager().getMoodAsString(entityUUID);
+                bukkitEntity.setCustomName(Utility.colourise("&a&lCow &8- " + moodAsString));
+            }
+        }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 1, 20L));
+
+        // Entity Mood Decrease Task
         tasks.add(new BukkitRunnable() {
             @Override
             public void run() {
@@ -192,6 +204,18 @@ public class CadiaMob {
         plugin.getMobManager().getMobs().remove(this);
 
         Utility.removeMob(entityUUID);
+    }
+
+    private void spawnCircleParticle(Color color) {
+        Location location = bukkitEntity.getLocation();
+        for (int degree = 0; degree < 360; degree++) {
+            double radians = Math.toRadians(degree);
+            double x = Math.cos(radians);
+            double z = Math.sin(radians);
+            location.add(x, 0, z);
+            location.getWorld().spawnParticle(Particle.REDSTONE.builder().color(Color.RED).count(1).particle(), location.clone().add(0, 1, 0), 2, new Particle.DustOptions(color, 1));
+            location.subtract(x, 0, z);
+        }
     }
 
     public void serialise() {

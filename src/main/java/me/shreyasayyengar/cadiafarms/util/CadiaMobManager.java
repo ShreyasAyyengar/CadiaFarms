@@ -48,7 +48,7 @@ public class CadiaMobManager {
         randomisdDrops.get(type).add(weight, material);
     }
 
-    public String getMobMood(UUID mobUUID) {
+    public String getMoodAsString(UUID mobUUID) {
 
         String mood = Utility.colourise("&7Failed to retrieve mood");
         for (CadiaMob mob : mobs) {

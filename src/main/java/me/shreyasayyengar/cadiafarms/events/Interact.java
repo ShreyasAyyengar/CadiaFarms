@@ -69,10 +69,7 @@ public class Interact implements Listener {
                     EntityType type = EntityType.valueOf(itemMeta.getLocalizedName().split("\\.")[1]);
                     player.getInventory().getItemInMainHand().subtract();
                     //noinspection ConstantConditions
-                    Ageable entity = (Ageable) player.getWorld().spawnEntity(event.getClickedBlock().getLocation().add(.5, 1.5, .5), type);
-                    entity.setAdult();
-                    entity.setCustomNameVisible(false);
-                    entity.setCustomName(null);
+                    Ageable entity = (Ageable) player.getWorld().spawnEntity(event.getClickedBlock().getLocation().toCenterLocation().add(0, .5, 0), type);
                     new CadiaMob(entity);
                 }
             }
