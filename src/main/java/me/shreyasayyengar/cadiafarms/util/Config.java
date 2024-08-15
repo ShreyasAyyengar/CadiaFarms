@@ -100,6 +100,6 @@ public class Config {
     }
 
     public static String getDisplayName(int guiSlot) {
-        return main.getConfig().getString("GUI." + guiSlot + ".displayname");
+        return Utility.colourise(main.getConfig().getString("GUI." + guiSlot + ".displayname"));
     }
 }

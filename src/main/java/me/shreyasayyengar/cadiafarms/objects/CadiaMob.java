@@ -9,16 +9,12 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 public class CadiaMob {
 
@@ -64,7 +60,6 @@ public class CadiaMob {
         this.entityUUID = entity.getUniqueId();
         this.entityType = entity.getType();
         this.moodLevel = 0.5;
-        //noinspection deprecation
         this.bukkitInventory = Bukkit.createInventory(null, 54, "Mob Bank");
         Utility.createData(this);
         setDrops();
@@ -79,89 +74,75 @@ public class CadiaMob {
     private void runTasks() {
         if (!this.loaded) return;
 
-        // Entity Null and Dead task
-        tasks.add(new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!CadiaMob.this.loaded) return;
-                if (bukkitEntity == null || bukkitEntity.isDead()) {
-                    plugin.getMobManager().getMobs().remove(CadiaMob.this);
-                    removeEntity();
-                }
+        // Entity Dead or Unloaded Task
+        BukkitTask deadTask = Bukkit.getScheduler().runTaskTimer(CadiaFarmsPlugin.getInstance(), () -> {
+            if (!CadiaMob.this.loaded) return;
+            if (bukkitEntity.isDead()) {
+                plugin.getMobManager().getMobs().remove(this);
+                removeEntity();
             }
-        }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 0, 20));
+        }, 0, 20);
 
-        // Entity Drop task
-        tasks.add(new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!CadiaMob.this.loaded) return;
+        // Entity Drop Task
+        BukkitTask dropTask = Bukkit.getScheduler().runTaskTimer(CadiaFarmsPlugin.getInstance(), () -> {
+            if (!CadiaMob.this.loaded) return;
 
-                if (previouslyFailedQuota) {
-                    dropItem();
-                    previouslyFailedQuota = false;
-                    return;
-                }
-
-                if (moodLevel >= drop5Quota) {
-                    dropItem();
-                    return;
-                }
-
-                previouslyFailedQuota = true;
+            if (previouslyFailedQuota) {
+                dropItem();
+                previouslyFailedQuota = false;
+                return;
             }
 
-        }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 1, 100));
+            if (moodLevel >= drop5Quota) {
+                dropItem();
+                return;
+            }
+
+            previouslyFailedQuota = true;
+        }, 1, 100);
 
         // Entity Calm Particle Task
-        tasks.add(new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!CadiaMob.this.loaded) return;
-                if (moodLevel > 0.7) return;
-
-                if (moodLevel > 0.5) {
-                    spawnCircleParticle(Color.fromBGR(255, 223, 13));
-                }
-
+        BukkitTask calmParticleTask = Bukkit.getScheduler().runTaskTimer(CadiaFarmsPlugin.getInstance(), () -> {
+            if (!CadiaMob.this.loaded) return;
+            if (moodLevel > 0.7) return;
+            if (moodLevel > 0.5) {
+                spawnCircleParticle(Color.fromBGR(255, 223, 13));
             }
-        }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 1, 3000L));
+        }, 1, 3000);
 
         // Entity Angry Particle Task
-        tasks.add(new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (moodLevel <= 0.5) {
-                    spawnCircleParticle(Color.fromBGR(0, 0, 181));
-                }
+        BukkitTask angryParticleTask = Bukkit.getScheduler().runTaskTimer(CadiaFarmsPlugin.getInstance(), () -> {
+
+            if (moodLevel <= 0.5) {
+                spawnCircleParticle(Color.fromBGR(0, 0, 181));
             }
-        }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 1, 160));
 
-        tasks.add(new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!CadiaMob.this.loaded) return;
+        }, 1, 160);
 
-                if (!bukkitEntity.isCustomNameVisible()) {
-                    bukkitEntity.setCustomNameVisible(true);
-                }
+        // Entity Update Name Task
+        BukkitTask updateNameTask = Bukkit.getScheduler().runTaskTimer(CadiaFarmsPlugin.getInstance(), () -> {
 
-                String moodAsString = CadiaFarmsPlugin.getInstance().getMobManager().getMoodAsString(entityUUID);
-                bukkitEntity.setCustomName(Utility.colourise("&a&lCow &8- " + moodAsString));
+            if (!CadiaMob.this.loaded) return;
+
+            if (!bukkitEntity.isCustomNameVisible()) {
+                bukkitEntity.setCustomNameVisible(true);
             }
-        }.runTaskTimer(CadiaFarmsPlugin.getInstance(), 1, 20L));
+
+            String moodAsString = CadiaFarmsPlugin.getInstance().getMobManager().getMoodAsString(entityUUID);
+            bukkitEntity.setCustomName(Utility.colourise("&a&lCow &8- " + moodAsString));
+
+        }, 1, 20);
 
         // Entity Mood Decrease Task
-        tasks.add(new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!CadiaMob.this.loaded) return;
+        BukkitTask moodTask = Bukkit.getScheduler().runTaskTimerAsynchronously(CadiaFarmsPlugin.getInstance(), () -> {
+            if (!CadiaMob.this.loaded) return;
 
-                if (moodLevel > 0) {
-                    moodLevel -= 0.1;
-                }
+            if (moodLevel > 0) {
+                moodLevel -= 0.1;
             }
-        }.runTaskTimerAsynchronously(CadiaFarmsPlugin.getInstance(), 12000, 12000));
+        }, 12000, 12000);
+
+        tasks.addAll(List.of(deadTask, dropTask, calmParticleTask, angryParticleTask, updateNameTask, moodTask));
     }
 
     private void dropItem() {
@@ -197,13 +178,10 @@ public class CadiaMob {
     }
 
     private void removeEntity() {
-        for (BukkitTask task : tasks) {
-            task.cancel();
-        }
-
+        tasks.forEach(BukkitTask::cancel);
         plugin.getMobManager().getMobs().remove(this);
 
-        Utility.removeMob(entityUUID);
+        CadiaFarmsPlugin.getInstance().getDatabase().preparedStatementBuilder("DELETE FROM cadia_mob_info WHERE uuid = '" + entityUUID + "'").executeUpdate();
     }
 
     private void spawnCircleParticle(Color color) {
@@ -212,18 +190,19 @@ public class CadiaMob {
             double radians = Math.toRadians(degree);
             double x = Math.cos(radians);
             double z = Math.sin(radians);
+
+            double red = color.getRed() / 255D;
+            double green = color.getGreen() / 255D;
+            double blue = color.getBlue() / 255D;
+
             location.add(x, 0, z);
-            location.getWorld().spawnParticle(Particle.REDSTONE.builder().color(Color.RED).count(1).particle(), location.clone().add(0, 1, 0), 2, new Particle.DustOptions(color, 1));
+            location.getWorld().spawnParticle(Particle.SPELL_MOB, location.clone().add(0, 1, 0), 0, red, green, blue, 1);
             location.subtract(x, 0, z);
         }
     }
 
     public void serialise() {
-        try {
-            plugin.getDatabase().preparedStatement("UPDATE cadia_mob_info SET entity_type = '" + entityType + "', mood_level = '" + moodLevel + "', inventory = '" + InventoryUtil.toBase64(bukkitInventory) + "' WHERE uuid = '" + entityUUID + "'").executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        plugin.getDatabase().preparedStatementBuilder("UPDATE cadia_mob_info SET entity_type = '" + entityType + "', mood_level = '" + moodLevel + "', inventory = '" + InventoryUtil.toBase64(bukkitInventory) + "' WHERE uuid = '" + entityUUID + "'").executeUpdate();
     }
 
     public void load() {
@@ -235,10 +214,6 @@ public class CadiaMob {
     }
 
     // --- Getters
-
-    public UUID getEntityUUID() {
-        return this.entityUUID;
-    }
 
     public void plusMood() {
         if (moodLevel < 1.0) {
@@ -264,5 +239,9 @@ public class CadiaMob {
 
     public EntityType getType() {
         return entityType;
+    }
+
+    public UUID getEntityUUID() {
+        return this.entityUUID;
     }
 }

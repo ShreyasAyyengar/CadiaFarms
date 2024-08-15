@@ -7,7 +7,6 @@ import org.bukkit.ChatColor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
 
 public class Utility {
 
@@ -30,12 +29,5 @@ public class Utility {
         }
     }
 
-    public static void removeMob(UUID entityUUID) {
-        try {
-            CadiaFarmsPlugin.getInstance().getDatabase().preparedStatement("DELETE FROM cadia_mob_info WHERE `uuid` = '" + entityUUID + "'").executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
 }

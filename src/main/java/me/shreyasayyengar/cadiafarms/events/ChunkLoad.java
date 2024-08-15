@@ -44,7 +44,7 @@ public class ChunkLoad implements Listener {
                     }
                 }
             }
-        }.runTaskLater(CadiaFarmsPlugin.getInstance(), 20);
+        }.runTaskLater(CadiaFarmsPlugin.getInstance(), 40);
     }
 
     @EventHandler

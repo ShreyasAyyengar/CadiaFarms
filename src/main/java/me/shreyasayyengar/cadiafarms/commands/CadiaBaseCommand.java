@@ -53,6 +53,7 @@ public class CadiaBaseCommand implements CommandExecutor {
                     CadiaFarmsPlugin.getInstance().getMobManager().giveCadiaMobEgg(target, type, amount);
 
                 }
+
                 case "clear", "remove" -> {
                     if (args.length != 2) {
                         sendUsage(player);
@@ -72,9 +73,15 @@ public class CadiaBaseCommand implements CommandExecutor {
                     CadiaFarmsPlugin.getInstance().getMobManager().clearMobs(type, chunk);
 
                 }
+
                 case "reload" -> {
                     CadiaFarmsPlugin.getInstance().reloadConfig();
                     player.sendMessage(Utility.colourise("&aConfiguration & Plugin reloaded!"));
+                    return false;
+                }
+
+                default -> {
+                    sendUsage(player);
                     return false;
                 }
             }

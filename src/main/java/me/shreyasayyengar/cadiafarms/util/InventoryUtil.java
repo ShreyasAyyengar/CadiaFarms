@@ -63,31 +63,44 @@ public class InventoryUtil {
         assert mob != null;
 
         Inventory inventory = Bukkit.createInventory(null, 9, Utility.colourise("&6&lCadia Mob Inventory"));
+        String moodAsString = CadiaFarmsPlugin.getInstance().getMobManager().getMoodAsString(mobUUID);
+
+        int maxMobsPerChunk = Config.getMaxChunkEntities();
+        int currentMobsPerChunk = CadiaFarmsPlugin.getInstance().getMobManager().getEntityCountInChunk(Bukkit.getEntity(mobUUID).getChunk());
+        double moodLevel = mob.getMoodLevel();
 
         ItemStack mood = new ItemStack(Material.TOTEM_OF_UNDYING);
         ItemMeta moodMeta = mood.getItemMeta();
-        moodMeta.setDisplayName(Utility.colourise("&6&lMood"));
         moodMeta.setLocalizedName("cadia.cancel");
-        moodMeta.setLore(List.of(
-                "Current mood level: " + CadiaFarmsPlugin.getInstance().getMobManager().getMoodAsString(mobUUID),
-                "(" + (int) (mob.getMoodLevel() * 10) + "/10)"
-        ));
+//        moodMeta.setDisplayName(Utility.colourise("&6&lMood"));
+//        moodMeta.setLore(List.of(
+//                "Current mood level: " + CadiaFarmsPlugin.getInstance().getMobManager().getMoodAsString(mobUUID),
+//                "(" + (int) (mob.getMoodLevel() * 10) + "/10)"
+//        ));
+        moodMeta.setDisplayName(Config.getDisplayName(1));
+        moodMeta.setLore(Config.getLore(1).stream().map(s -> s.replace("{moodWord}", moodAsString).replace("{moodNumber}", ((int) (moodLevel * 10)) + "")).toList());
+
         mood.setItemMeta(moodMeta);
 
         ItemStack openStorage = new ItemStack(Material.CHEST);
         ItemMeta openStorageItemMeta = openStorage.getItemMeta();
-        openStorageItemMeta.setDisplayName(Utility.colourise("&6&lOpen Drop Storage"));
         openStorageItemMeta.setLocalizedName("cadia.openbank." + mobUUID);
+//        openStorageItemMeta.setDisplayName(Utility.colourise("&6&lOpen Drop Storage"));
+        openStorageItemMeta.setDisplayName(Config.getDisplayName(2));
+        openStorageItemMeta.setLore(Config.getLore(2));
         openStorage.setItemMeta(openStorageItemMeta);
 
         ItemStack dropOptions = new ItemStack(Material.BUNDLE);
         ItemMeta dropOptionsItemMeta = dropOptions.getItemMeta();
-        dropOptionsItemMeta.setDisplayName(Utility.colourise("&6&lDrop Options"));
         dropOptionsItemMeta.setLocalizedName("cadia.droppings." + mobUUID);
+//        dropOptionsItemMeta.setDisplayName(Utility.colourise("&6&lDrop Options"));
+        dropOptionsItemMeta.setDisplayName(Config.getDisplayName(3));
+        dropOptionsItemMeta.setLore(Config.getLore(3));
         dropOptions.setItemMeta(dropOptionsItemMeta);
 
         ItemStack drop = new ItemStack(Material.BARRIER);
         ItemMeta dropMeta = drop.getItemMeta();
+        dropMeta.setLocalizedName("cadia.toggle." + mobUUID);
         dropMeta.setDisplayName(Utility.colourise("&6&lDrop Item"));
         if (mob.doesDrop()) {
             drop = new ItemStack(Material.GREEN_TERRACOTTA);
@@ -96,15 +109,17 @@ public class InventoryUtil {
             drop = new ItemStack(Material.RED_TERRACOTTA);
             dropMeta.setLore(List.of(Utility.colourise("&c&lDrop on Floor: &c&lFalse")));
         }
-        dropMeta.setLocalizedName("cadia.toggle." + mobUUID);
         drop.setItemMeta(dropMeta);
 
 
         ItemStack numberInChunks = new ItemStack(Material.SPAWNER);
         ItemMeta numberInChunksItemMeta = numberInChunks.getItemMeta();
-        numberInChunksItemMeta.setDisplayName(Utility.colourise(
-                "&dNumber of Mobs in Chunk: &d" + CadiaFarmsPlugin.getInstance().getMobManager().getEntityCountInChunk(location.getChunk()) + "/" + Config.getMaxChunkEntities()));
         numberInChunksItemMeta.setLocalizedName("cadia.cancel");
+
+//        numberInChunksItemMeta.setDisplayName(Utility.colourise(
+//                "&dNumber of Mobs in Chunk: &d" + CadiaFarmsPlugin.getInstance().getMobManager().getEntityCountInChunk(location.getChunk()) + "/" + Config.getMaxChunkEntities()));
+        numberInChunksItemMeta.setDisplayName(Config.getDisplayName(5).replace("{current}", String.valueOf(currentMobsPerChunk)).replace("{max}", String.valueOf(maxMobsPerChunk)));
+        numberInChunksItemMeta.setLore(Config.getLore(5).stream().map(s -> s.replace("{current}", String.valueOf(currentMobsPerChunk)).replace("{max}", String.valueOf(maxMobsPerChunk))).toList());
         numberInChunks.setItemMeta(numberInChunksItemMeta);
 
         inventory.setItem(0, mood);

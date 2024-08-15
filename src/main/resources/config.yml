@@ -26,31 +26,27 @@ MySQL:
   port: 3306
 
 # Do **NOT** change the numbers 1, 2, 3 etc. You may only change what is below them
+# The 4th item in the GUI cannot be changed/configured
+
 GUI:
   1:
-    displayname:
+    displayname: "&6&lMood"
     lore:
-      -
-      -
+      - "Current mood level: {moodWord}"
+      - "(moodNumber}"
 
   2:
-    displayname:
+    displayname: "&6&lOpen Drop Storage"
     lore:
-      -
-      -
+      - "&7Click to open your mobs' drop storage"
 
   3:
-    displayname:
+    displayname: "&6&lDrop Options"
     lore:
-      -
-      -
-  4:
-    displayname:
-    lore:
-      -
-      -
+      - "&7Click to see the different drops"
+      - "&7that this mob can drop"
+
   5:
-    displayname:
+    displayname: "&dNumber of Mobs in Chunk: &d{currentMobsInChunk}/{maxMobsPerChunk}"
     lore:
-      -
-      -
+      - "&dHover to see the number of mobs in this chunk"

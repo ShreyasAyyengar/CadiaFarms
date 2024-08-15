@@ -21,20 +21,8 @@ public class CadiaMobManager {
     private final List<CadiaMob> mobs = new ArrayList<>();
     private final Map<EntityType, RandomWeightCollection<Material>> randomisdDrops = new HashMap<>();
 
-    @SuppressWarnings("deprecation")
-    public void giveCadiaMobEgg(Player player, EntityType type, int amount) {
-
-        ItemStack stack = new SpawnEgg(type).toItemStack(amount);
-        SpawnEggMeta itemMeta = (SpawnEggMeta) stack.getItemMeta();
-        itemMeta.setDisplayName(WordUtils.capitalize(type.name().toLowerCase()) + " Spawn Egg");
-        itemMeta.setLocalizedName("cadiamob." + type.name() + ".cancelexempt");
-        stack.setItemMeta(itemMeta);
-
-        HashMap<Integer, ItemStack> integerItemStackHashMap = player.getInventory().addItem(stack);
-        if (!integerItemStackHashMap.isEmpty()) {
-            player.getWorld().dropItem(player.getLocation(), integerItemStackHashMap.get(0));
-        }
-        player.sendMessage(Utility.colourise("&bSpawn egg given!"));
+    public List<CadiaMob> getMobs() {
+        return mobs;
     }
 
     public RandomWeightCollection<Material> getDrops(EntityType type) {
@@ -46,6 +34,32 @@ public class CadiaMobManager {
             randomisdDrops.put(type, new RandomWeightCollection<>());
         }
         randomisdDrops.get(type).add(weight, material);
+    }
+
+    public void clearMobs(EntityType type, Chunk chunk) {
+        for (Entity entity : chunk.getEntities()) {
+            for (CadiaMob mob : mobs) {
+                if (mob.getEntityUUID().equals(entity.getUniqueId())) {
+                    if (mob.getType().equals(type)) {
+                        entity.remove();
+                    }
+                }
+            }
+        }
+    }
+
+
+    @SuppressWarnings("deprecation")
+    public void giveCadiaMobEgg(Player player, EntityType type, int amount) {
+
+        ItemStack stack = new SpawnEgg(type).toItemStack(amount);
+        SpawnEggMeta itemMeta = (SpawnEggMeta) stack.getItemMeta();
+        itemMeta.setDisplayName(WordUtils.capitalize(type.name().toLowerCase()) + " Spawn Egg");
+        itemMeta.setLocalizedName("cadiamob." + type.name() + ".cancelexempt");
+        stack.setItemMeta(itemMeta);
+
+        player.getInventory().addItem(stack).forEach((integer, itemStack) -> player.getWorld().dropItem(player.getLocation(), itemStack));
+        player.sendMessage(Utility.colourise("&bSpawn egg given!"));
     }
 
     public String getMoodAsString(UUID mobUUID) {
@@ -71,22 +85,6 @@ public class CadiaMobManager {
         return mood;
     }
 
-    public List<CadiaMob> getMobs() {
-        return mobs;
-    }
-
-    public void clearMobs(EntityType type, Chunk chunk) {
-        for (Entity entity : chunk.getEntities()) {
-            for (CadiaMob mob : mobs) {
-                if (mob.getEntityUUID().equals(entity.getUniqueId())) {
-                    if (mob.getType().equals(type)) {
-                        entity.remove();
-                    }
-                }
-            }
-        }
-    }
-
     public int getEntityCountInChunk(Chunk chunk) {
         AtomicInteger amount = new AtomicInteger();
 
@@ -100,5 +98,4 @@ public class CadiaMobManager {
 
         return amount.get();
     }
-
 }

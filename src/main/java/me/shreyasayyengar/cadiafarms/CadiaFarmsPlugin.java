@@ -13,6 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public final class CadiaFarmsPlugin extends JavaPlugin {
 
@@ -30,17 +31,14 @@ public final class CadiaFarmsPlugin extends JavaPlugin {
         registerCommands();
         initMySQL();
         loadExistingMobs();
-        initLegacyItems();
-    }
-
-    private void initLegacyItems() {
-
     }
 
     private void registerEvents() {
-        this.getServer().getPluginManager().registerEvents(new Interact(), this);
-        this.getServer().getPluginManager().registerEvents(new Click(), this);
-        this.getServer().getPluginManager().registerEvents(new ChunkLoad(), this);
+        Stream.of(
+                new Interact(),
+                new Click(),
+                new ChunkLoad()
+        ).forEach(event -> getServer().getPluginManager().registerEvents(event, this));
     }
 
     private void registerCommands() {
@@ -51,17 +49,13 @@ public final class CadiaFarmsPlugin extends JavaPlugin {
     private void initMySQL() {
         this.database = new MySQL(Config.getSQL("username"), Config.getSQL("password"), Config.getSQL("database"), Config.getSQL("host"), Integer.parseInt(Config.getSQL("port")));
 
-        try {
-            this.database.preparedStatement("create table if not exists cadia_mob_info(" +
-                    "    uuid        varchar(36) null," +
-                    "    entity_type tinyblob    null," +
-                    "    inventory   longtext    null," +
-                    "    drop_floor  boolean     default false," +
-                    "    mood_level  double      null" +
-                    ");").executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        this.database.preparedStatementBuilder("create table if not exists cadia_mob_info(" +
+                "    uuid        varchar(36) null," +
+                "    entity_type tinyblob    null," +
+                "    inventory   longtext    null," +
+                "    drop_floor  boolean     default false," +
+                "    mood_level  double      null" +
+                ");").executeUpdate();
     }
 
     private void loadExistingMobs() {
